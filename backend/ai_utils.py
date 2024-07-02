@@ -1,3 +1,4 @@
+from time import sleep
 import anthropic
 import instructor
 from anthropic import Anthropic
@@ -67,14 +68,14 @@ def segment_meeting_timewise(key: str, transcript: str) -> str:
         f"Can you segment the following meeting? {transcript}",
         SONNET)
 
-def segment_meeting_timewise_structured(key: str, transcript: str) -> Meeting:
+def segment_meeting_timewise_structured(key: str, transcript: str) -> List[MeetingSegment]:
     segments = segment_meeting_timewise(key, transcript)
     return claude_structured(
         key,
         "You are a council meeting segmenter. Always return a point form summary of the meeting with timing durations",
         f"Can you turn the following meeting into 'segments' with fields 'start_time', 'end_time', and 'text': {segments}",
         HAIKU,
-        Meeting)
+        List[MeetingSegment])
 
 def keyword_extractor(key: str, transcript: str) -> str:
     return claude(
@@ -83,10 +84,11 @@ def keyword_extractor(key: str, transcript: str) -> str:
         f"Can you extract keywords from the following meeting? {transcript}")
 
 def keyword_extractor_structured(key: str, transcript: str) -> List[str]:
+    keywords = keyword_extractor(key, transcript)
     return claude_structured(
         key,
         "You are a council meeting keyword extractor. Always return a list of keywords from the meeting.",
-        f"Can you extract keywords from the following meeting? {transcript}",
+        f"Can you extract keywords from the following meeting? {keywords}",
         HAIKU,
         List[str])
 
@@ -103,10 +105,11 @@ def decision_extractor(key:str, transcript: str) -> str:
         f"Can you extract decisions from the following meeting? {transcript}")
 
 def decision_extractor_structured(key: str, transcript: str) -> List[str]:
+    decisions = decision_extractor(key, transcript)
     return claude_structured(
         key,
         "You are a council meeting decision extractor. Just return a list of decisions made during the meeting.",
-        f"Can you extract decisions from the following meeting, no preamble, no numbering? {transcript}",
+        f"Can you extract decisions from the following meeting, no preamble, no numbering? {decisions}",
         SONNET,
         List[str])
 
@@ -124,12 +127,16 @@ def cleaner_and_labeler(key: str, transcript: str) -> str:
 def extract_meeting_info(key: str, transcript: str):
     segments = segment_meeting_timewise_structured(key, transcript)
     logger.info(f"Got segments")
+    sleep(2)
     keywords = keyword_extractor_structured(key, transcript)
     logger.info(f"Got keywords")
+    sleep(2)
     decisions = decision_extractor_structured(key, transcript)
     logger.info(f"Got decisions")
+    sleep(2)
     summary = summarize_meeting(key, transcript)
     logger.info(f"Got summary")
+    sleep(2)
     return {
         "segments": segments,
         "keywords": keywords,
