@@ -12,6 +12,8 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from typing import List
 
+import uvicorn
+
 # Internal dependencies
 from app_logger import logger
 import web_utils
@@ -25,12 +27,15 @@ from datastore import Datastore
 CONFIG = environ.get('CONFIG')
 decoded = str(base64.b64decode(bytes(CONFIG, 'utf-8')), 'utf-8')
 config = json.loads(decoded)
+HOST = config['host']
+PORT = config['port']
 CRONSERVICE_URL = config['cronservice_url']
 CLAUDE_KEY = config['claude_key']
 DATABASE_STR = config['db_url']
 
 # Connect to the database
 DB = Datastore(DATABASE_STR)
+DB.save_city(CitySummary(city_id=uuid.uuid4(), city_name='Waterloo', city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
 
 # Set up the app and rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -60,7 +65,7 @@ def cities() -> List[CitySummary]:
     return DB.get_all_city_summaries()
 
 @app.get('/meetings')
-def meetings(city_id: int) -> List[MeetingSummary]:
+def meetings(city_id: uuid.UUID) -> List[MeetingSummary]:
     return DB.get_all_meetings(city_id)
 
 @app.get('/meeting/{meeting_id}')
@@ -72,17 +77,24 @@ def meeting(meeting_id: int) -> Meeting:
 ############################################
 
 @app.get('/jobs/download')
-async def download(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
+# async def download(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
+async def download(valid_token: str):
     last_meeting_date = DB.get_last_meeting_date()
     all_cities = DB.get_all_city_summaries()
+    logger.info(f'Last meeting date: {last_meeting_date} city_count: {len(all_cities)}')
     for city in all_cities:
-        new_meetings = rss_utils.get_all_urls_newer_than_date(city.city_url, last_meeting_date)
+        new_meetings = rss_utils.get_all_newer_than_date(city.city_url, last_meeting_date)
+        logger.info(f'City {city.city_name} new_meetings: {len(new_meetings)}')
         for meeting_url in new_meetings:
+            logger.info(f'Processing meeting {meeting_url}')
             try:
+                meeting_id = uuid.uuid4()
                 meeting_transcript = youtube_utils.get_transcript(meeting_url)
+                logger.info(f'Got meeting transcript length={len(meeting_transcript)}')
                 meeting_info = ai_utils.extract_meeting_info(CLAUDE_KEY, meeting_transcript)
+                logger.info(f'Extracted meeting info')
                 meeting = Meeting(
-                    meeting_id = uuid.uuid4(),
+                    meeting_id = meeting_id,
                     city_id = city.city_id,
                     meeting_date = last_meeting_date,
                     meeting_keywords = meeting_info['keywords'],
@@ -93,3 +105,5 @@ async def download(valid_token = Depends(lambda x: web_utils.get_valid_token(CRO
             except Exception as e:
                 logger.error(f'Error processing meeting {meeting_url}: {e}')
     return {}
+
+uvicorn.run(app, host=HOST, port=PORT)
