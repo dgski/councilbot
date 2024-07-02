@@ -3,6 +3,7 @@ import base64
 import json
 from os import environ
 import time
+import uuid
 from fastapi import Request, Response
 from fastapi import FastAPI, Depends
 from fastapi.responses import Response
@@ -72,17 +73,18 @@ def meeting(meeting_id: int) -> Meeting:
 
 @app.get('/jobs/notify')
 async def notify(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
-    current_time_seconds = int(time.time())
+    last_meeting_date = DB.get_last_meeting_date()
     all_cities = DB.get_all_city_summaries()
     for city in all_cities:
-        new_meetings = rss_utils.get_all_urls_newer_than_date(city.city_url, current_time_seconds)
+        new_meetings = rss_utils.get_all_urls_newer_than_date(city.city_url, last_meeting_date)
         for meeting_url in new_meetings:
             try:
                 meeting_transcript = youtube_utils.get_transcript(meeting_url)
                 meeting_info = ai_utils.extract_meeting_info(CLAUDE_KEY, meeting_transcript)
                 meeting = Meeting(
-                    meeting_id = 0,
-                    meeting_date = current_time_seconds,
+                    meeting_id = uuid.uuid4(),
+                    city_id = city.city_id,
+                    meeting_date = last_meeting_date,
                     meeting_keywords = meeting_info['keywords'],
                     meeting_segments = meeting_info['segments'],
                     meeting_decisions = meeting_info['decisions']

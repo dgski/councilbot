@@ -24,3 +24,6 @@ class Datastore:
 
     def save_meeting(self, meeting: Meeting):
         self.meetings.append(meeting)
+
+    def get_last_meeting_date(self) -> int:
+        return max([meeting.meeting_date for meeting in self.meetings])
