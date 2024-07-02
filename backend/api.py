@@ -12,6 +12,7 @@ from slowapi.errors import RateLimitExceeded
 from typing import List
 
 # Internal dependencies
+from app_logger import logger
 import web_utils
 import rss_utils
 import youtube_utils
@@ -76,7 +77,17 @@ async def notify(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONS
     for city in all_cities:
         new_meetings = rss_utils.get_all_urls_newer_than_date(city.city_url, current_time_seconds)
         for meeting_url in new_meetings:
-            meeting_transcript = youtube_utils.get_transcript(meeting_url)
-            meeting = ai_utils.extract_meeting_info(meeting_transcript)
-            DB.save_meeting(meeting)
+            try:
+                meeting_transcript = youtube_utils.get_transcript(meeting_url)
+                meeting_info = ai_utils.extract_meeting_info(CLAUDE_KEY, meeting_transcript)
+                meeting = Meeting(
+                    meeting_id = 0,
+                    meeting_date = current_time_seconds,
+                    meeting_keywords = meeting_info['keywords'],
+                    meeting_segments = meeting_info['segments'],
+                    meeting_decisions = meeting_info['decisions']
+                )
+                DB.save_meeting(meeting)
+            except Exception as e:
+                logger.error(f'Error processing meeting {meeting_url}: {e}')
     return {}
