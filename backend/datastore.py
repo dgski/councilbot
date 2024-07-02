@@ -1,3 +1,4 @@
+import time
 from typing import List
 import uuid
 from models import CitySummary, MeetingSummary, Meeting
@@ -26,4 +27,8 @@ class Datastore:
         self.meetings.append(meeting)
 
     def get_last_meeting_date(self) -> int:
+        # TODO: make 0
+        if len(self.meetings) == 0:
+            one_week = 60 * 60 * 24 * 7
+            return time.time() - one_week
         return max([meeting.meeting_date for meeting in self.meetings])
