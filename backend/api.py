@@ -85,25 +85,25 @@ async def download(valid_token: str):
     for city in all_cities:
         new_meetings = rss_utils.get_all_newer_than_date(city.city_url, last_meeting_date)
         logger.info(f'City {city.city_name} new_meetings: {len(new_meetings)}')
-        for meeting_url in new_meetings:
-            logger.info(f'Processing meeting {meeting_url}')
+        for meeting in new_meetings:
+            logger.info(f"Processing meeting {meeting['link']}")
             try:
                 meeting_id = uuid.uuid4()
-                meeting_transcript = youtube_utils.get_transcript(meeting_url)
+                meeting_transcript = youtube_utils.get_raw_transcript(meeting['link'])
                 logger.info(f'Got meeting transcript length={len(meeting_transcript)}')
                 meeting_info = ai_utils.extract_meeting_info(CLAUDE_KEY, meeting_transcript)
                 logger.info(f'Extracted meeting info')
                 meeting = Meeting(
                     meeting_id = meeting_id,
                     city_id = city.city_id,
-                    meeting_date = last_meeting_date,
+                    meeting_date = meeting['date'],
                     meeting_keywords = meeting_info['keywords'],
                     meeting_segments = meeting_info['segments'],
                     meeting_decisions = meeting_info['decisions']
                 )
                 DB.save_meeting(meeting)
             except Exception as e:
-                logger.error(f'Error processing meeting {meeting_url}: {e}')
+                logger.error(f'Error processing meeting {meeting}: {e}')
     return {}
 
 uvicorn.run(app, host=HOST, port=PORT)

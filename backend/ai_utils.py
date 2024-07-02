@@ -4,6 +4,7 @@ from anthropic import Anthropic
 from pydantic import BaseModel
 from typing import List
 from models import MeetingSegment
+from app_logger import logger
 
 class Meeting(BaseModel):
     segments: List[MeetingSegment]
@@ -55,6 +56,7 @@ def claude(key: str, system_prompt: str, user_prompt: str, model: str = HAIKU):
 
 def summarize_meeting(key: str, transcript: str) -> str:
     return claude(
+        key,
         "You are a council meeting summarizer. Always return a point form summary of the meeting with numeric details.",
         f"Can you summarize the following meeting? {transcript}")
 
@@ -121,9 +123,13 @@ def cleaner_and_labeler(key: str, transcript: str) -> str:
 
 def extract_meeting_info(key: str, transcript: str):
     segments = segment_meeting_timewise_structured(key, transcript)
+    logger.info(f"Got segments")
     keywords = keyword_extractor_structured(key, transcript)
+    logger.info(f"Got keywords")
     decisions = decision_extractor_structured(key, transcript)
+    logger.info(f"Got decisions")
     summary = summarize_meeting(key, transcript)
+    logger.info(f"Got summary")
     return {
         "segments": segments,
         "keywords": keywords,
