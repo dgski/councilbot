@@ -61,15 +61,15 @@ async def add_custom_cors_headers(request : Request, call_next):
 ############################################
 
 @app.get('/cities')
-def cities() -> List[CitySummary]:
+async def cities() -> List[CitySummary]:
     return DB.get_all_city_summaries()
 
 @app.get('/meetings')
-def meetings(city_id: uuid.UUID) -> List[MeetingSummary]:
+async def meetings(city_id: uuid.UUID) -> List[MeetingSummary]:
     return DB.get_all_meetings(city_id)
 
 @app.get('/meeting/{meeting_id}')
-def meeting(meeting_id: int) -> Meeting:
+async def meeting(meeting_id: uuid.UUID) -> Meeting:
     return DB.get_meeting(meeting_id)
 
 ############################################

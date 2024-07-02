@@ -70,6 +70,7 @@ def segment_meeting_timewise(key: str, transcript: str) -> str:
 
 def segment_meeting_timewise_structured(key: str, transcript: str) -> List[MeetingSegment]:
     segments = segment_meeting_timewise(key, transcript)
+    sleep(2)
     return claude_structured(
         key,
         "You are a council meeting segmenter. Always return a point form summary of the meeting with timing durations",
@@ -85,6 +86,7 @@ def keyword_extractor(key: str, transcript: str) -> str:
 
 def keyword_extractor_structured(key: str, transcript: str) -> List[str]:
     keywords = keyword_extractor(key, transcript)
+    sleep(2)
     return claude_structured(
         key,
         "You are a council meeting keyword extractor. Always return a list of keywords from the meeting.",
@@ -106,6 +108,7 @@ def decision_extractor(key:str, transcript: str) -> str:
 
 def decision_extractor_structured(key: str, transcript: str) -> List[str]:
     decisions = decision_extractor(key, transcript)
+    sleep(2)
     return claude_structured(
         key,
         "You are a council meeting decision extractor. Just return a list of decisions made during the meeting.",
@@ -127,16 +130,16 @@ def cleaner_and_labeler(key: str, transcript: str) -> str:
 def extract_meeting_info(key: str, transcript: str):
     segments = segment_meeting_timewise_structured(key, transcript)
     logger.info(f"Got segments")
-    sleep(2)
+    sleep(5)
     keywords = keyword_extractor_structured(key, transcript)
     logger.info(f"Got keywords")
-    sleep(2)
+    sleep(5)
     decisions = decision_extractor_structured(key, transcript)
     logger.info(f"Got decisions")
-    sleep(2)
+    sleep(5)
     summary = summarize_meeting(key, transcript)
     logger.info(f"Got summary")
-    sleep(2)
+    sleep(5)
     return {
         "segments": segments,
         "keywords": keywords,
