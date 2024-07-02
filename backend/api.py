@@ -71,8 +71,8 @@ def meeting(meeting_id: int) -> Meeting:
 # Job endpoints
 ############################################
 
-@app.get('/jobs/notify')
-async def notify(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
+@app.get('/jobs/download')
+async def download(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
     last_meeting_date = DB.get_last_meeting_date()
     all_cities = DB.get_all_city_summaries()
     for city in all_cities:
