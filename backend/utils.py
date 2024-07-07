@@ -18,7 +18,8 @@ async def create_meeting(claude_key: str, meeting_id: uuid.UUID, city_id: uuid.U
                 meeting_link = meeting_link,
                 meeting_keywords = meeting_info['keywords'],
                 meeting_segments = meeting_info['segments'],
-                meeting_decisions = meeting_info['decisions'])
+                meeting_decisions = meeting_info['decisions'],
+                meeting_summary = meeting_info['summary'])
             return meeting
         except Exception as e:
             logger.error(f'Error extracting meeting info: {e}')

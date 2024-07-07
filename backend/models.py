@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class CitySummary(BaseModel):
@@ -25,3 +25,4 @@ class Meeting(BaseModel):
     meeting_keywords: List[str]
     meeting_segments: List[MeetingSegment]
     meeting_decisions: List[str]
+    meeting_summary: str = Field(default='')
