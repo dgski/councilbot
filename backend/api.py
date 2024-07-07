@@ -95,12 +95,12 @@ async def download(valid_token: str):
     MAX_MEETINGS_PER_SESSION = 1
     meetings_so_far = 0
     for city in all_cities:
-        if meetings_so_far >= MAX_MEETINGS_PER_SESSION:
-            logger.info(f"Reached max meetings {MAX_MEETINGS_PER_SESSION}")
-            break
         new_meetings = rss_utils.get_all_links(city.city_url)
         logger.info(f'City {city.city_name} new_meetings: {len(new_meetings)}')
         for meeting_info in new_meetings:
+            if meetings_so_far >= MAX_MEETINGS_PER_SESSION:
+                logger.info(f"Reached max meetings {MAX_MEETINGS_PER_SESSION}")
+                return { 'processed': meetings_so_far }
             meeting_link = meeting_info['link']
             meeting_date = meeting_info['date']
             if meeting_link in all_meetings:
