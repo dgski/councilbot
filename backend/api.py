@@ -19,7 +19,7 @@ from app_logger import logger
 import web_utils
 import rss_utils
 import youtube_utils
-import ai_utils
+import utils
 from models import CitySummary, MeetingSummary, Meeting
 from datastore import Datastore
 
@@ -35,7 +35,6 @@ DATABASE_STR = config['db_url']
 
 # Connect to the database
 DB = Datastore(DATABASE_STR)
-DB.save_city(CitySummary(city_id=uuid.uuid4(), city_name='Waterloo', city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
 
 # Set up the app and rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -62,15 +61,18 @@ async def add_custom_cors_headers(request : Request, call_next):
 
 @app.get('/cities')
 async def cities() -> List[CitySummary]:
-    return DB.get_all_city_summaries()
+    cities = await DB.get_all_city_summaries()
+    if len(cities) == 0:
+        await DB.save_city(CitySummary(city_id=uuid.uuid4(), city_name='Waterloo', city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
+    return await DB.get_all_city_summaries()
 
 @app.get('/meetings')
 async def meetings(city_id: uuid.UUID) -> List[MeetingSummary]:
-    return DB.get_all_meetings(city_id)
+    return await DB.get_all_meetings(city_id)
 
 @app.get('/meeting/{meeting_id}')
 async def meeting(meeting_id: uuid.UUID) -> Meeting:
-    return DB.get_meeting(meeting_id)
+    return await DB.get_meeting(meeting_id)
 
 ############################################
 # Job endpoints
@@ -79,31 +81,28 @@ async def meeting(meeting_id: uuid.UUID) -> Meeting:
 @app.get('/jobs/download')
 # async def download(valid_token = Depends(lambda x: web_utils.get_valid_token(CRONSERVICE_URL, x))):
 async def download(valid_token: str):
-    last_meeting_date = DB.get_last_meeting_date()
-    all_cities = DB.get_all_city_summaries()
-    logger.info(f'Last meeting date: {last_meeting_date} city_count: {len(all_cities)}')
+    all_cities = await DB.get_all_city_summaries()
+    all_meetings = await DB.get_all_links()
+    MAX_MEETINGS_PRE_SESSION = 10
+    meetings_so_far = 0
     for city in all_cities:
-        new_meetings = rss_utils.get_all_newer_than_date(city.city_url, last_meeting_date)
+        if meetings_so_far >= MAX_MEETINGS_PRE_SESSION:
+            logger.info(f"Reached max meetings {MAX_MEETINGS_PRE_SESSION}")
+            break
+        new_meetings = rss_utils.get_all_links(city.city_url)
         logger.info(f'City {city.city_name} new_meetings: {len(new_meetings)}')
-        for meeting in new_meetings:
-            logger.info(f"Processing meeting {meeting['link']}")
-            try:
-                meeting_id = uuid.uuid4()
-                meeting_transcript = youtube_utils.get_raw_transcript(meeting['link'])
-                logger.info(f'Got meeting transcript length={len(meeting_transcript)}')
-                meeting_info = ai_utils.extract_meeting_info(CLAUDE_KEY, meeting_transcript)
-                logger.info(f'Extracted meeting info')
-                meeting = Meeting(
-                    meeting_id = meeting_id,
-                    city_id = city.city_id,
-                    meeting_date = meeting['date'],
-                    meeting_keywords = meeting_info['keywords'],
-                    meeting_segments = meeting_info['segments'],
-                    meeting_decisions = meeting_info['decisions']
-                )
-                DB.save_meeting(meeting)
-            except Exception as e:
-                logger.error(f'Error processing meeting {meeting}: {e}')
+        for meeting_info in new_meetings:
+            meeting_link = meeting_info['link']
+            meeting_date = meeting_info['date']
+            if meeting_link in all_meetings:
+                logger.info(f"Skipping meeting {meeting_link} since already have it in DB")
+                continue
+            logger.info(f"Processing meeting {meeting_link}")
+            meeting_id = uuid.uuid4()
+            meeting_transcript = youtube_utils.get_raw_transcript(meeting_link)
+            meeting = await utils.create_meeting(CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_transcript)
+            await DB.save_meeting(meeting)
+            meetings_so_far += 1
     return {}
 
 uvicorn.run(app, host=HOST, port=PORT)
