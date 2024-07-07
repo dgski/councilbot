@@ -5,7 +5,7 @@ from app_logger import logger
 def get_list_of_proxies() -> list:
     url = 'https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&proxy_format=protocolipport&format=text'
     response = requests.get(url)
-    return [url for url in response.text.split('\n') if url.startswith('http')]
+    return [url.strip() for url in response.text.split('\n') if url.startswith('http')]
 
 # Get the raw transcript from a YouTube video
 def get_raw_transcript(proxy_https: str, proxy_http: str, video_url: str) -> str:
