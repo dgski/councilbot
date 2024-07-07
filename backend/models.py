@@ -10,7 +10,7 @@ class CitySummary(BaseModel):
 class MeetingSummary(BaseModel):
     meeting_id: uuid.UUID
     meeting_date: int
-    meeting_keywords: List[str]
+    meeting_decisions: List[str]
 
 class MeetingSegment(BaseModel):
     start_time_seconds: int
