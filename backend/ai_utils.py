@@ -2,8 +2,7 @@ import asyncio
 from time import sleep
 import anthropic
 import instructor
-from anthropic import Anthropic, AsyncAnthropic
-from pydantic import BaseModel
+from anthropic import AsyncAnthropic
 from typing import List
 from models import MeetingSegment
 from app_logger import logger

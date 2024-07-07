@@ -7,7 +7,7 @@ import ai_utils
 async def create_meeting(claude_key: str, meeting_id: uuid.UUID, city_id: uuid.UUID, meeting_date: str, meeting_transcript: str) -> Meeting:
     for model in (ai_utils.HAIKU, ai_utils.SONNET):
         try:
-            logger.info(f'AI extraction i={i}')
+            logger.info(f'Trying model {model}')
             logger.info(f'Got meeting transcript length={len(meeting_transcript)}')
             meeting_info = await ai_utils.extract_meeting_info(claude_key, meeting_transcript, model)
             logger.info(f'Extracted meeting info')
