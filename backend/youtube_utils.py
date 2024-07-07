@@ -16,5 +16,7 @@ def get_raw_transcript(proxy_https: str, proxy_http: str, video_url: str) -> str
             transcript = YouTubeTranscriptApi.get_transcript(
                 video_id, proxies={"https": proxy, "http": proxy})
             return '\n'.join([str(line['start']) + 's : ' + line['text'] for line in transcript])
-        except:
+        except Exception as e:
+            logger.error(f"Error getting transcript: {e}")
             continue
+    raise Exception("Could not get transcript")
