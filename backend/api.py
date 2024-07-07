@@ -56,6 +56,15 @@ async def add_custom_cors_headers(request : Request, call_next):
     return response
 
 ############################################
+# Start Up Event
+############################################
+
+@app.on_event("startup")
+async def startup_event():
+    await DB.connect()
+    await DB.create_table()
+
+############################################
 # Data endpoints
 ############################################
 
@@ -83,11 +92,11 @@ async def meeting(meeting_id: uuid.UUID) -> Meeting:
 async def download(valid_token: str):
     all_cities = await DB.get_all_city_summaries()
     all_meetings = await DB.get_all_links()
-    MAX_MEETINGS_PRE_SESSION = 10
+    MAX_MEETINGS_PER_SESSION = 1
     meetings_so_far = 0
     for city in all_cities:
-        if meetings_so_far >= MAX_MEETINGS_PRE_SESSION:
-            logger.info(f"Reached max meetings {MAX_MEETINGS_PRE_SESSION}")
+        if meetings_so_far >= MAX_MEETINGS_PER_SESSION:
+            logger.info(f"Reached max meetings {MAX_MEETINGS_PER_SESSION}")
             break
         new_meetings = rss_utils.get_all_links(city.city_url)
         logger.info(f'City {city.city_name} new_meetings: {len(new_meetings)}')

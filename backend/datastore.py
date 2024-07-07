@@ -1,30 +1,46 @@
+import json
 import time
 from typing import List, Set
 import uuid
 from models import CitySummary, MeetingSummary, Meeting
 
+from databases import Database
+
+def parse_data(s):
+    return json.loads(s['data'])
+
 class Datastore:
     def __init__(self, db_url: str):
         self.cities = []
         self.meetings = []
+        self.database = Database(db_url)
+        self.create_table()
         pass
 
+    async def connect(self):
+        await self.database.connect()
+
+    async def create_table(self):
+        await self.database.execute('CREATE TABLE IF NOT EXISTS entity (type TEXT, id TEXT, data JSON)')
+
     async def get_all_city_summaries(self) -> List[CitySummary]:
-        return self.cities
+        results = await self.database.fetch_all("SELECT * FROM entity WHERE type = 'city'")
+        return [CitySummary(**parse_data(city)) for city in results]
 
     async def get_all_meetings(self, city_id: uuid.UUID) -> List[MeetingSummary]:
-        return [meeting for meeting in self.meetings if meeting.city_id == city_id]
+        results = await self.database.fetch_all("SELECT * FROM entity WHERE type = 'meeting' AND data->>'city_id' = :city_id", {'city_id': str(city_id)})
+        return [MeetingSummary(**parse_data(meeting)) for meeting in results]
 
     async def get_meeting(self, meeting_id: uuid.UUID) -> Meeting:
-        for meeting in self.meetings:
-            if meeting.meeting_id == meeting_id:
-                return meeting
+        result = await self.database.fetch_one("SELECT * FROM entity WHERE type = 'meeting' AND id = :meeting_id", {'meeting_id': str(meeting_id)})
+        return Meeting(**parse_data(result))
     
     async def get_all_links(self) -> Set[str]:
-        return {meeting.link for meeting in self.meetings}
+        results = await self.database.fetch_all("SELECT data->>'link' FROM entity WHERE type = 'meeting'")
+        return {result[0] for result in results }
 
     async def save_city(self, city: CitySummary):
-        self.cities.append(city)
+        await self.database.execute("INSERT INTO entity (type, id, data) VALUES (:type, :id, :data)", {'type': 'city', 'id': str(city.city_id), 'data': city.model_dump_json()})
 
     async def save_meeting(self, meeting: Meeting):
-        self.meetings.append(meeting)
+        await self.database.execute("INSERT INTO entity (type, id, data) VALUES (:type, :id, :data)", {'type': 'meeting', 'id': str(meeting.meeting_id), 'data': meeting.model_dump_json()})
