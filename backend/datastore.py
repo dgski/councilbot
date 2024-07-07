@@ -14,7 +14,6 @@ class Datastore:
         self.cities = []
         self.meetings = []
         self.database = Database(db_url)
-        self.create_table()
         pass
 
     async def connect(self):
