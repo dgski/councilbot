@@ -21,6 +21,7 @@ class Meeting(BaseModel):
     meeting_id: uuid.UUID
     city_id: uuid.UUID
     meeting_date: int
+    meeting_link: str
     meeting_keywords: List[str]
     meeting_segments: List[MeetingSegment]
     meeting_decisions: List[str]

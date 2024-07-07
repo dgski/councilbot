@@ -92,6 +92,7 @@ async def meeting(meeting_id: uuid.UUID) -> Meeting:
 async def download(valid_token: str):
     all_cities = await DB.get_all_city_summaries()
     all_meetings = await DB.get_all_links()
+    logger.info(f'All meetings: {all_meetings}')
     MAX_MEETINGS_PER_SESSION = 1
     meetings_so_far = 0
     for city in all_cities:
@@ -109,7 +110,7 @@ async def download(valid_token: str):
             logger.info(f"Processing meeting {meeting_link}")
             meeting_id = uuid.uuid4()
             meeting_transcript = youtube_utils.get_raw_transcript(meeting_link)
-            meeting = await utils.create_meeting(CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_transcript)
+            meeting = await utils.create_meeting(CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_link, meeting_transcript)
             await DB.save_meeting(meeting)
             meetings_so_far += 1
     return {}

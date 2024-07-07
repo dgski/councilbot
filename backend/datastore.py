@@ -36,8 +36,8 @@ class Datastore:
         return Meeting(**parse_data(result))
     
     async def get_all_links(self) -> Set[str]:
-        results = await self.database.fetch_all("SELECT data->>'link' FROM entity WHERE type = 'meeting'")
-        return {result[0] for result in results }
+        results = await self.database.fetch_all("SELECT data->>'meeting_link' AS link FROM entity WHERE type = 'meeting'")
+        return set(result['link'] for result in results)
 
     async def save_city(self, city: CitySummary):
         await self.database.execute("INSERT INTO entity (type, id, data) VALUES (:type, :id, :data)", {'type': 'city', 'id': str(city.city_id), 'data': city.model_dump_json()})
