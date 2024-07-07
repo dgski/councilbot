@@ -8,7 +8,7 @@ def get_list_of_proxies() -> list:
     return [url.strip() for url in response.text.split('\n') if url.startswith('http')]
 
 # Get the raw transcript from a YouTube video
-def get_raw_transcript(proxy_https: str, proxy_http: str, video_url: str) -> str:
+def get_raw_transcript(video_url: str) -> str:
     video_id = video_url.split('=')[1]
     for proxy in get_list_of_proxies():
         logger.info(f"Trying proxy {proxy}")
