@@ -32,6 +32,7 @@ PORT = config['port']
 CRONSERVICE_URL = config['cronservice_url']
 CLAUDE_KEY = config['claude_key']
 DATABASE_STR = config['db_url']
+PROXY_URL = config['proxy_url']
 
 # Connect to the database
 DB = Datastore(DATABASE_STR)
@@ -108,7 +109,7 @@ async def download(valid_token = Depends(lambda jobToken: web_utils.get_valid_to
                 continue
             logger.info(f"Processing meeting {meeting_link}")
             meeting_id = uuid.uuid4()
-            meeting_transcript = youtube_utils.get_raw_transcript(meeting_link)
+            meeting_transcript = youtube_utils.get_raw_transcript(PROXY_URL, meeting_link)
             meeting = await utils.create_meeting(CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_link, meeting_transcript)
             await DB.save_meeting(meeting)
             meetings_so_far += 1
