@@ -53,6 +53,28 @@
         line-height: 1.5em;
         margin-top: 2em;
     }
+
+    @media (max-width: 800px) {
+        #hero {
+            padding: 0px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        #hero-content {
+            width: calc(100% - 40px);
+            margin-left: 0;
+            padding-left: 20px;
+            padding-right: 20px;
+            font-size: 1em;
+        }
+
+        #main {
+            width: calc(100% - 40px);
+            padding: 20px;
+            font-size: 1em;
+            margin-top: 0;
+        }
+    }
 </style>
 
 <div id="hero">

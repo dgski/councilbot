@@ -58,6 +58,19 @@
         font-size: 1.5em;
         margin-top: 1em;
     }
+
+    @media (max-width: 800px) {
+        #header {
+            width: calc(100% - 20px);
+        }
+
+        #main {
+            width: calc(100% - 40px);
+            padding: 20px;
+            font-size: 1em;
+            margin-top: 0;
+        }
+    }
 </style>
 
 <div id="header">
