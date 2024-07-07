@@ -72,7 +72,11 @@ async def startup_event():
 async def cities() -> List[CitySummary]:
     cities = await DB.get_all_city_summaries()
     if len(cities) == 0:
-        await DB.save_city(CitySummary(city_id=uuid.uuid4(), city_name='Waterloo', city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
+        await DB.save_city(
+            CitySummary(
+                city_id=uuid.uuid4(),
+                city_name='Waterloo',
+                city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
     return await DB.get_all_city_summaries()
 
 @app.get('/meetings')
@@ -92,7 +96,7 @@ async def download(valid_token = Depends(lambda jobToken: web_utils.get_valid_to
     all_cities = await DB.get_all_city_summaries()
     all_meetings = await DB.get_all_links()
     logger.info(f'All meetings: {all_meetings}')
-    MAX_MEETINGS_PER_SESSION = 1
+    MAX_MEETINGS_PER_SESSION = 2
     meetings_so_far = 0
     for city in all_cities:
         new_meetings = rss_utils.get_all_links(city.city_url)
@@ -109,7 +113,8 @@ async def download(valid_token = Depends(lambda jobToken: web_utils.get_valid_to
             logger.info(f"Processing meeting {meeting_link}")
             meeting_id = uuid.uuid4()
             meeting_transcript = youtube_utils.get_raw_transcript(meeting_link)
-            meeting = await utils.create_meeting(CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_link, meeting_transcript)
+            meeting = await utils.create_meeting(
+                CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_link, meeting_transcript)
             await DB.save_meeting(meeting)
             meetings_so_far += 1
     return {}
