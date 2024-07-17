@@ -15,8 +15,8 @@ async def get_raw_transcript(video_url: str) -> str:
         logger.info(f"Trying proxy {proxy}")
         try:
             
-            transcript = YouTubeTranscriptApi.get_transcript(
-                video_id, proxies={"https": proxy, "http": proxy})
+            transcript = await asyncio.to_thread(lambda: YouTubeTranscriptApi.get_transcript(
+                video_id, proxies={"https": proxy, "http": proxy}))
             return '\n'.join([str(line['start']) + 's : ' + line['text'] for line in transcript])
         except (NoTranscriptAvailable, NoTranscriptFound, TranscriptsDisabled) as e:
             logger.error(f"No transcript found: {e}")
