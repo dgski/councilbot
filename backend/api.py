@@ -92,7 +92,9 @@ async def meeting(meeting_id: uuid.UUID) -> Meeting:
 ############################################
 
 @app.get('/jobs/download')
-async def download(valid_token = Depends(lambda jobToken: web_utils.get_valid_token(CRONSERVICE_URL, jobToken))):
+async def download(
+    valid_token = Depends(lambda jobToken: web_utils.get_valid_token(CRONSERVICE_URL, jobToken))
+):
     all_cities = await DB.get_all_city_summaries()
     all_meetings = await DB.get_all_links()
     logger.info(f'All meetings: {all_meetings}')

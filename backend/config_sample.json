@@ -1,0 +1,7 @@
+{
+    "host": "0.0.0.0",
+    "port": 80,
+    "cronservice_url": "CRONSERVICE_URL_GOES_HERE",
+    "claude_key": "CLAUDE_KEY_GOES_HERE",
+    "db_url": "DB_URL_GOES_HERE"
+}

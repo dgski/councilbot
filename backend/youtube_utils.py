@@ -3,6 +3,7 @@ import requests
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptAvailable, NoTranscriptFound, TranscriptsDisabled
 from app_logger import logger
 
+# Get a list of proxies that may be able to bypass YouTube's rate limiting
 def get_list_of_proxies() -> list:
     url = 'https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&proxy_format=protocolipport&format=text'
     response = requests.get(url)
