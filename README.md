@@ -13,7 +13,7 @@ Checks for new council meetings videos, downloads their transcripts and extracts
 
 ## TODO
 
-- [] Better frontend UI/UX.
-- [] Support multiple cities in frontend (Or decide to have everything separate).
-- [] Email subscription mechanism?
-- [] Search Functionality
+- [ ] Better frontend UI/UX.
+- [ ] Support multiple cities in frontend (Or decide to have everything separate).
+- [ ] Email subscription mechanism?
+- [ ] Search Functionality
