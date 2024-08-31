@@ -2,21 +2,25 @@
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import Meeting from '../../../Meeting.svelte';
+    import Nav from '../../../Nav.svelte';
 
     /**
      * @type {any[]}
      */
     let meetings = []
     let council_name = "";
+    let city_id = undefined;
 
     page.subscribe(value => {
+        city_id = value.params.id;
+
         fetch(`https://councilbot-api.xantasoft.com/meetings?city_id=${value.params.id}`)
             .then(res => res.json())
             .then(data => {
                 meetings = data;
             });
         
-            fetch(`https://councilbot-api.xantasoft.com/city/${value.params.id}`)
+        fetch(`https://councilbot-api.xantasoft.com/city/${value.params.id}`)
             .then(res => res.json())
             .then(data => {
                 council_name = data.city_name;
@@ -80,12 +84,10 @@
         }
     }
 </style>
-<div id="nav">
-
-</div>
+<Nav selection={city_id} />
 <div id="hero">
     <div id="hero-content">
-        <p id="hero-question">Do you know what the {council_name} Council is doing with your tax money and city?</p>
+        <p id="hero-question">Do you know what {council_name} Council is doing with your tax money and city?</p>
         <p><b>councilbot</b> gives you a seat at the table by using AI to summarize hours of meetings.</p>
     </div>
 </div>

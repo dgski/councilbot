@@ -34,13 +34,19 @@
         margin-left: 0;
         display: inline-block;
     }
+
+    @media (max-width: 800px) {
+        .keyword {
+            font-size: 0.8em;
+            padding: 5px;
+            margin: 3px;
+        }
+    }
 </style>
 
 <div class="meeting">
     <h3><a href="/meeting/{meeting.meeting_id}">{toString(meeting.meeting_date)}</a></h3>
-    <ul>
         {#each getKeywords(meeting.meeting_decisions) as decision}
             <span class="keyword">{decision}</span>
         {/each}
-    </ul>
 </div>

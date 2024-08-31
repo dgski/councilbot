@@ -3,12 +3,14 @@
 
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
+    import NavStatic from '../../../NavStatic.svelte';
 
     /**
      * @type {{ meeting_date: any; meeting_keywords: any; meeting_segments: any; meeting_decisions: any; } | null}
      */
     let data = null;
     let city_name = "";
+    let city_id = "";
 
     // Get id from URL
     page.subscribe(value => {
@@ -17,17 +19,9 @@
             .then(incoming => {
                 console.log(incoming);
                 data = incoming;
-                fetch_city_info(data.city_id);
+                city_id = data.city_id;
             });
     });
-
-    let fetch_city_info = (city_id) => {
-        fetch(`https://councilbot-api.xantasoft.com/city/${city_id}`)
-            .then(res => res.json())
-            .then(incoming => {
-                city_name = incoming.city_name;
-            });
-    }
 
     let toString = (seconds) => {
         let minutes = Math.floor(seconds / 60);
@@ -42,16 +36,6 @@
         margin: 0;
     }
 
-    #header {
-        background-color: #f4f4f4;
-        color: #333;
-        padding: 10px;
-        width: 100%;
-        margin: 0 auto;
-        text-align: center;
-        font-weight: 800;
-    }
-    
     #main {
         width: 800px;
         margin: 0 auto;
@@ -70,10 +54,6 @@
     }
 
     @media (max-width: 800px) {
-        #header {
-            width: calc(100% - 20px);
-        }
-
         #main {
             width: calc(100% - 40px);
             padding: 20px;
@@ -82,10 +62,7 @@
         }
     }
 </style>
-
-<div id="header">
-    <a href="/">councilbot ({city_name})</a> 
-</div>
+<NavStatic {city_id} />
 <div id="main">
     {#if data}
         <h1>{new Date(data.meeting_date * 1000).toDateString()}</h1>
