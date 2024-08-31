@@ -119,6 +119,9 @@ async def download(
             logger.info(f"Processing meeting {meeting_link}")
             meeting_id = uuid.uuid4()
             meeting_transcript = await youtube_utils.get_raw_transcript(meeting_link)
+            if meeting_transcript == "":
+                logger.error(f"Failed to get transcript for meeting {meeting_link}")
+                continue
             meeting = await utils.create_meeting(
                 CLAUDE_KEY, meeting_id, city.city_id, meeting_date, meeting_link, meeting_transcript)
             await DB.save_meeting(meeting)

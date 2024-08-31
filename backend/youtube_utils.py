@@ -26,4 +26,4 @@ async def get_raw_transcript(video_url: str) -> str:
             logger.error(f"General error: {e}")
             await asyncio.sleep(1)
             continue
-    raise Exception("Could not get transcript")
+    return ""
