@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import Meeting from '../Meeting.svelte';
 
     /**
      * @type {any[]}
@@ -13,11 +14,6 @@
                 meetings = data;
             });
     });
-
-    let toString = (seconds) => {
-        let date = new Date(seconds * 1000);
-        return date.toDateString();
-    }
 </script>
 
 <style>
@@ -76,7 +72,9 @@
         }
     }
 </style>
+<div id="nav">
 
+</div>
 <div id="hero">
     <div id="hero-content">
         <p id="hero-question">Do you know what the Waterloo City Council is doing with your tax money and city?</p>
@@ -86,14 +84,7 @@
 <div id="main">
     <div id="main-content">
         {#each meetings as meeting}
-            <div class="meeting">
-                <h3><a href="/meeting/{meeting.meeting_id}">{toString(meeting.meeting_date)}</a></h3>
-                <ul>
-                    {#each meeting.meeting_decisions as decision}
-                        <li>{decision}</li>
-                    {/each}
-                </ul>
-            </div>
+            <Meeting {meeting} />
         {/each}
     </div>
 </div>
