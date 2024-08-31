@@ -8,6 +8,7 @@
      * @type {{ meeting_date: any; meeting_keywords: any; meeting_segments: any; meeting_decisions: any; } | null}
      */
     let data = null;
+    let city_name = "";
 
     // Get id from URL
     page.subscribe(value => {
@@ -16,8 +17,17 @@
             .then(incoming => {
                 console.log(incoming);
                 data = incoming;
+                fetch_city_info(data.city_id);
             });
     });
+
+    let fetch_city_info = (city_id) => {
+        fetch(`https://councilbot-api.xantasoft.com/city/${city_id}`)
+            .then(res => res.json())
+            .then(incoming => {
+                city_name = incoming.city_name;
+            });
+    }
 
     let toString = (seconds) => {
         let minutes = Math.floor(seconds / 60);
@@ -74,7 +84,7 @@
 </style>
 
 <div id="header">
-    <a href="/">councilbot (Waterloo)</a> 
+    <a href="/">councilbot ({city_name})</a> 
 </div>
 <div id="main">
     {#if data}
