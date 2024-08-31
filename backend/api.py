@@ -79,6 +79,10 @@ async def cities() -> List[CitySummary]:
                 city_url='https://www.youtube.com/feeds/videos.xml?channel_id=UCVP6QGtoGy5jmMkKhE3FRPA'))
     return await DB.get_all_city_summaries()
 
+@app.get('/city/{city_id}')
+async def city(city_id: uuid.UUID) -> CitySummary:
+    return await DB.get_city(city_id)
+
 @app.get('/meetings')
 async def meetings(city_id: uuid.UUID) -> List[MeetingSummary]:
     return await DB.get_all_meetings(city_id)

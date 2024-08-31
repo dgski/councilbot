@@ -27,6 +27,12 @@ class Datastore:
     async def get_all_city_summaries(self) -> List[CitySummary]:
         results = await self.database.fetch_all("SELECT * FROM entity WHERE type = 'city'")
         return [CitySummary(**parse_data(city)) for city in results]
+    
+    async def get_city(self, city_id: uuid.UUID) -> CitySummary:
+        result = await self.database.fetch_one(
+            "SELECT * FROM entity WHERE type = 'city' AND id = :city_id",
+            {'city_id': str(city_id)})
+        return CitySummary(**parse_data(result))
 
     async def get_all_meetings(self, city_id: uuid.UUID) -> List[MeetingSummary]:
         results = await self.database.fetch_all(
