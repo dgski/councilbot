@@ -7,6 +7,7 @@
      * @type {any[]}
      */
     let meetings = []
+    let council_name = "";
 
     page.subscribe(value => {
         fetch(`https://councilbot-api.xantasoft.com/meetings?city_id=${value.params.id}`)
@@ -16,6 +17,10 @@
             });
         
             fetch(`https://councilbot-api.xantasoft.com/city/${value.params.id}`)
+            .then(res => res.json())
+            .then(data => {
+                council_name = data.city_name;
+            });
     });
 </script>
 
@@ -80,7 +85,7 @@
 </div>
 <div id="hero">
     <div id="hero-content">
-        <p id="hero-question">Do you know what the Waterloo City Council is doing with your tax money and city?</p>
+        <p id="hero-question">Do you know what the {council_name} Council is doing with your tax money and city?</p>
         <p><b>councilbot</b> gives you a seat at the table by using AI to summarize hours of meetings.</p>
     </div>
 </div>
