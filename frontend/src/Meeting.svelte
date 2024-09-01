@@ -24,7 +24,7 @@
 
 <style>
     .keyword {
-        font-size: 1em;
+        font-size: 0.9em;
         font-weight: 800;
         background-color: #f4f4f4;
         color: #333;
@@ -45,7 +45,7 @@
 </style>
 
 <div class="meeting">
-    <h3><a href="/meeting/{meeting.meeting_id}">{toString(meeting.meeting_date)}</a></h3>
+    <h2><a href="/meeting/{meeting.meeting_id}">{toString(meeting.meeting_date)}</a></h2>
         {#each getKeywords(meeting.meeting_decisions) as decision}
             <span class="keyword">{decision}</span>
         {/each}
