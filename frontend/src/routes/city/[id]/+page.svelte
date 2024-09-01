@@ -87,7 +87,7 @@
 <Nav selection={city_id} />
 <div id="hero">
     <div id="hero-content">
-        <p id="hero-question">Do you know what {council_name} Council is doing with your tax money and city?</p>
+        <p id="hero-question">Do you know what the {council_name} Council is doing with your tax money and city?</p>
         <p><b>councilbot</b> gives you a seat at the table by using AI to summarize hours of meetings.</p>
     </div>
 </div>
